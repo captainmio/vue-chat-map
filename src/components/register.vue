@@ -11,7 +11,7 @@
         @submit.prevent="validateForm"
       >
         <md-card
-          class="center-card md-layout-item md-size-50 md-small-size-100"
+          class="center-card md-layout-item md-size-50 md-small-size-100 p-4"
         >
           <md-card-header>
             <div class="md-title font-bold">Register User</div>
@@ -35,6 +35,7 @@
                   >
                   <span
                     class="md-error"
+                    :class="!$v.form.firstName.required ? 'pt-6' : ''"
                     v-else-if="!$v.form.firstName.minlength"
                     >Invalid first name</span
                   >
@@ -55,7 +56,10 @@
                   <span class="md-error" v-if="!$v.form.lastName.required"
                     >The last name is required</span
                   >
-                  <span class="md-error" v-else-if="!$v.form.lastName.minlength"
+                  <span
+                    class="md-error"
+                    :class="!$v.form.lastName.required ? 'pt-6' : ''"
+                    v-else-if="!$v.form.lastName.minlength"
                     >Invalid last name</span
                   >
                 </md-field>
@@ -97,9 +101,6 @@
                   <span class="md-error" v-if="!$v.form.age.required"
                     >The age is required</span
                   >
-                  <span class="md-error" v-else-if="!$v.form.age.maxlength"
-                    >Invalid age</span
-                  >
                 </md-field>
               </div>
             </div>
@@ -117,7 +118,10 @@
               <span class="md-error" v-if="!$v.form.email.required"
                 >The email is required</span
               >
-              <span class="md-error" v-else-if="!$v.form.email.email"
+              <span
+                class="md-error"
+                :class="!$v.form.email.required ? 'pt-6' : ''"
+                v-else-if="!$v.form.email.email"
                 >Invalid email</span
               >
             </md-field>
@@ -157,6 +161,7 @@
               >
               <span
                 class="md-error"
+                :class="!$v.form.confirmPassword.required ? 'pt-6' : ''"
                 v-if="!$v.form.confirmPassword.sameAsPassword"
                 >password doesn't match</span
               >
@@ -166,7 +171,13 @@
           <md-progress-bar md-mode="indeterminate" v-if="sending" />
 
           <md-card-actions>
-            <md-button type="submit" class="md-primary" :disabled="sending"
+            <!-- <md-button type="submit" class="md-primary" :disabled="sending"
+              >Create user</md-button
+            > -->
+            <md-button
+              type="submit"
+              :disabled="sending"
+              class="md-raised md-primary p-4"
               >Create user</md-button
             >
           </md-card-actions>
@@ -190,13 +201,13 @@ import {
   sameAs,
 } from "vuelidate/lib/validators";
 
-import HereMap from "@/components/hereMap.vue"
+import HereMap from "@/components/hereMap.vue";
 
 export default {
   name: "register",
   mixins: [validationMixin],
   components: {
-      HereMap
+    HereMap,
   },
   data: () => ({
     form: {
@@ -281,8 +292,12 @@ export default {
     },
     alphaOnly(event) {
       var inputValue = event.which ? event.which : event.keyCode;
-      if(!(inputValue >= 65 && inputValue <= 120) && (inputValue != 32 && inputValue != 0)) { 
-          event.preventDefault(); 
+      if (
+        !(inputValue >= 65 && inputValue <= 120) &&
+        inputValue != 32 &&
+        inputValue != 0
+      ) {
+        event.preventDefault();
       }
     },
     registerUser() {
@@ -298,7 +313,7 @@ export default {
         })
         .then((data) => {
           console.log(data);
-          if (data == 'success') {
+          if (data == "success") {
             this.snackBarPop(
               "success",
               "The user " +
