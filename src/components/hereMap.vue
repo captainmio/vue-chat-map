@@ -1,38 +1,70 @@
 <template>
-  <div>
-    <div style="width: 640px; height: 480px" id="mapContainer"></div>
+  <div class="here-map">
+    <div
+      id="Heremap"
+      ref="map"
+      style="width: 100%; min-height: 800px; height: 100%;"
+    ></div>
   </div>
 </template>
 
-    <script src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js" type="text/javascript" charset="utf-8"></script>
 <script>
+import mapboxgl from "mapbox-gl"; // or "const mapboxgl = require('mapbox-gl');"
+
 export default {
-  name: "hereMap",
+  name: "HereMap",
   data() {
     return {
-      map: {},
       platform: {},
+      map: {},
     };
   },
-  created() {
-    this.platform =  new H.service.Platform({
-      'apikey': 'wbx7dfQXyrd2A-9lLz3sel0ZGWtdUUmCOL1lAzrYudo'
-    });
+  methods: {
+    addLatLng(coordinates) {
+      this.$store.dispatch("setMapCoordinates", {
+        lat: coordinates.lat,
+        lng: coordinates.lng,
+      });
+    },
   },
   mounted() {
-    var defaultLayers = this.platform.createDefaultLayers();
+    mapboxgl.accessToken =
+      "pk.eyJ1Ijoidml6ZHVtbXkyMSIsImEiOiJja2JxbHhoaHIybTNyMnNrMHFzNDBwbWVjIn0.B275Uzvl2fKgKaVqb2adhQ";
 
-    // Instantiate (and display) a map object:
-    var map = new H.Map(
-        document.getElementById('mapContainer'),
-        defaultLayers.vector.normal.map,
-        {
-          center: {lat:42.35805, lng:-71.0636},
-          zoom: 12,
-          pixelRatio: window.devicePixelRatio || 1
-        });
+    const map = new mapboxgl.Map({
+      container: "Heremap",
+      style: "mapbox://styles/mapbox/streets-v11", // stylesheet location
+      center: [0, 0],
+      zoom: 1.5, // starting zoom
+    });
+
+    var marker = new mapboxgl.Marker({
+      // draggable: true
+      anchor: "center",
+      pitchAlignment: "viewport",
+    })
+      .setLngLat([0, 0])
+      .addTo(map);
+
+    var self = this;
+
+    // events to stay put the marker on the center of the map
+    map.on("movestart", function() {
+      marker.setLngLat(map.getCenter());
+    });
+
+    map.on("move", function() {
+      marker.setLngLat(map.getCenter());
+    });
+
+    map.on("moveend", function() {
+      let coor = marker.setLngLat(map.getCenter());
+
+      // set coordinate and save it to the store
+      self.addLatLng(coor.getLngLat());
+    });
   },
 };
 </script>
 
-<style></style>
+<style scoped></style>
