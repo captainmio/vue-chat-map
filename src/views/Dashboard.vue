@@ -1,15 +1,17 @@
 <template>
   <div>
-      this is dashboard
+    <Navbar />
   </div>
 </template>
 
 <script>
-export default {
+import Navbar from "@/components/navbar.vue";
 
-}
+export default {
+  components: {
+    Navbar,
+  },
+};
 </script>
 
-<style>
-
-</style>
+<style></style>
