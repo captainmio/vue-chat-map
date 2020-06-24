@@ -1,9 +1,20 @@
 import firebase from "@/firebaseConfig";
-const db = firebase.firestore();
+const db = firebase;
 
 const state = {};
 
 const actions = {
+  login(context, payload){
+    return db
+    .auth()
+    .signInWithEmailAndPassword(payload.email_address, payload.password)
+    .then(() => {
+      return 'success'; // add user state here
+    })
+    .catch(() => {
+      return "Incorrect login credentials ";
+    });
+  },
   register(context, payload) {
     return context
       .dispatch("searchAccountByEmail", payload.email_address)
@@ -16,16 +27,22 @@ const actions = {
             coordinates !== "" &&
             typeof coordinates !== "undefined"
           ) {
-            console.log(payload);
+
             let merged = { ...payload, ...coordinates };
-            console.log(merged);
-            debugger;
+            
             // save registration data to firebase user collection
             return db
+              .firestore()
               .collection("users")
-              .add(payload)
+              .add(merged)
               .then(() => {
+                // create user of firebase auth()
+                db
+                .auth()
+                .createUserWithEmailAndPassword(payload.email_address, payload.password);
+
                 return "success";
+
               })
               .catch((error) => {
                 return "Error writing document: " + error;
@@ -43,6 +60,7 @@ const actions = {
   },
   searchAccountByEmail(context, payload) {
     return db
+      .firestore()
       .collection("users")
       .where("email_address", "==", payload)
       .get()

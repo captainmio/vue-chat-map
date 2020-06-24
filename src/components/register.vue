@@ -302,7 +302,6 @@ export default {
           password: this.form.password,
         })
         .then((data) => {
-          console.log(data);
           if (data == "success") {
             this.snackBarPop(
               "success",
