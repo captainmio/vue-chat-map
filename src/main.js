@@ -28,7 +28,6 @@ router.beforeEach((to, from, next) => {
           window.location.href = '/';
         });
       } else {
-        alert('Need to be logged-in to access this page?');
         window.location.href = '/';
       }
       
