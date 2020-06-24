@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import store from './store'
 import router from './router'
+import * as firebase from "firebase"
 
 Vue.config.productionTip = false
 
@@ -13,6 +14,30 @@ import 'vue-material/dist/theme/default.css'
 
 Vue.use(VueMaterial)
 /** VUE MATERIAL */
+
+
+router.beforeEach((to, from, next) => {
+  
+  if(to.meta.needsAuth) {
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        store.dispatch("fetchUser", user).then(() => {
+          next();
+        }).catch(() => {
+          alert('Need to be logged-in to access this page?');
+          window.location.href = '/';
+        });
+      } else {
+        alert('Need to be logged-in to access this page?');
+        window.location.href = '/';
+      }
+      
+    });
+  } else {
+    next();
+  }
+})
+
 
 
 new Vue({

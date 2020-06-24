@@ -1,9 +1,39 @@
 import firebase from "@/firebaseConfig";
-const db = firebase.firestore();
+const db = firebase;
 
-const state = {};
+const state = {
+  user: {
+    loggedIn: false,
+    data: null,
+  },
+};
 
 const actions = {
+  fetchUser({ commit, dispatch }, user) {
+    return new Promise((resolve, reject) => {
+      commit("SET_LOGGED_IN", user !== null);
+      if (user) {
+        dispatch("searchAccountByEmail", user.email).then((data) => {
+          commit("SET_USER", data[0]);
+          resolve(data);
+        });
+      } else {
+        commit("SET_USER", null);
+        reject("error");
+      }
+    });
+  },
+  login(context, payload) {
+    return db
+      .auth()
+      .signInWithEmailAndPassword(payload.email_address, payload.password)
+      .then(() => {
+        return "success";
+      })
+      .catch(() => {
+        return "Incorrect login credentials ";
+      });
+  },
   register(context, payload) {
     return context
       .dispatch("searchAccountByEmail", payload.email_address)
@@ -16,15 +46,21 @@ const actions = {
             coordinates !== "" &&
             typeof coordinates !== "undefined"
           ) {
-            console.log(payload);
             let merged = { ...payload, ...coordinates };
-            console.log(merged);
-            debugger;
+            delete merged["password"];
+
             // save registration data to firebase user collection
             return db
+              .firestore()
               .collection("users")
-              .add(payload)
+              .add(merged)
               .then(() => {
+                // create user of firebase auth()
+                db.auth().createUserWithEmailAndPassword(
+                  payload.email_address,
+                  payload.password
+                );
+
                 return "success";
               })
               .catch((error) => {
@@ -43,6 +79,7 @@ const actions = {
   },
   searchAccountByEmail(context, payload) {
     return db
+      .firestore()
       .collection("users")
       .where("email_address", "==", payload)
       .get()
@@ -53,18 +90,28 @@ const actions = {
             value_all.push(doc.data());
           }
         });
-
         return value_all;
       })
-      .catch((error) => {
-        console.log(error);
+      .catch(() => {
+        console.log("Error occured when trying to fetch data by email address");
       });
   },
 };
 
-const mutations = {};
+const mutations = {
+  SET_LOGGED_IN(state, value) {
+    state.user.loggedIn = value;
+  },
+  SET_USER(state, data) {
+    state.user.data = data;
+  },
+};
 
-const getters = {};
+const getters = {
+  user(state) {
+    return state.user;
+  },
+};
 
 export default {
   state,
