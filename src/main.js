@@ -2,7 +2,6 @@ import Vue from 'vue'
 import App from './App.vue'
 import store from './store'
 import router from './router'
-import * as firebase from "firebase"
 
 Vue.config.productionTip = false
 
@@ -15,6 +14,15 @@ import 'vue-material/dist/theme/default.css'
 Vue.use(VueMaterial)
 /** VUE MATERIAL */
 
+
+/** Vue Chat Scroll */
+import VueChatScroll from 'vue-chat-scroll'
+Vue.use(VueChatScroll)
+/** Vue Chat Scroll */
+
+/** FIREBASE */
+import * as firebase from "firebase"
+/** FIREBASE */
 
 router.beforeEach((to, from, next) => {
   
