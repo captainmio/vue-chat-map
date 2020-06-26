@@ -2,11 +2,14 @@
   <div>
     <Navbar />
     <div class="flex mb-4">
-      <div class="w-2/3 h-12">
+      <div class="w-3/6 h-12">
         <HereMap />
       </div>
-      <div class="w-1/3 h-12">
+      <div class="w-2/6 h-12">
         <GroupChat />
+      </div>
+      <div class="w-1/6 h-12">
+        login users
       </div>
    </div>
     

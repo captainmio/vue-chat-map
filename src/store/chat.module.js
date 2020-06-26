@@ -6,37 +6,16 @@ const state = {
 };
 
 const actions = {
-  groupChatConversation(context) {
-    // pull all group chat conversation to
-    return db
-      .firestore()
-      .collection("groupchat")
-      .get()
-      .then(function(querySnapshot) {
-        var value_all = [];
-        querySnapshot.forEach(function(doc) {
-          if (doc.id) {
-            value_all.push(doc.data());
-          }
-        });
-        context.commit('SET_GROUPCHAT_CONVERSATION', value_all);
-      })
-      .catch(() => {
-        console.log(
-          "Error occured when trying to fetch Group Chat conversation"
-        );
-      });
-  },
+
   newMessage(context, payload) {
     // create a data (Message) to groupchat collection
     return new Promise((resolve, reject) => {
-      db.firestore()
-        .collection("groupchat")
-        .add({
-          user: "Waelhi",
-          message: payload.message,
-          sendDate: Date(),
-        })
+      // didn't use firestore on this part as i need a real time database result so i used firebase Realtime Database
+      db.database()
+        .ref("groupchat")
+        .push({
+              sendDate: Date(), ...payload
+            })
         .then((data) => {
           resolve(data);
         })
@@ -53,7 +32,11 @@ const mutations = {
     }
 };
 
-const getters = {};
+const getters = {
+  groupChatConversation(state) {
+    return state.groupChatConversation;
+  }
+};
 
 export default {
   state,

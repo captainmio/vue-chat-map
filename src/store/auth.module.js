@@ -106,8 +106,11 @@ const actions = {
       .then(function(querySnapshot) {
         var value_all = [];
         querySnapshot.forEach(function(doc) {
+          
           if (doc.id) {
-            value_all.push(doc.data());
+            const data = doc.data();
+            data.id = doc.id;
+            value_all.push(data);
           }
         });
         return value_all;

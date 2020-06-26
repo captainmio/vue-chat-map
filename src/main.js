@@ -22,6 +22,7 @@ Vue.use(VueChatScroll)
 
 /** FIREBASE */
 import * as firebase from "firebase"
+Vue.prototype.$firebase = firebase;
 /** FIREBASE */
 
 router.beforeEach((to, from, next) => {
