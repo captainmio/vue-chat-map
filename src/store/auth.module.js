@@ -9,7 +9,26 @@ const state = {
 };
 
 const actions = {
+  Logout(context) {
+    return new Promise((resolve, reject) => {
+      return db
+      .auth()
+      .signOut()
+      .then(data => {
+        // purge user object value
+        context.commit("SET_USER", null);
+        context.commit("SET_LOGGED_IN", null);
+
+        resolve(data);
+      })
+      .catch(() => {
+        reject("Error on logout");
+      });
+      
+    });
+  },
   fetchUser({ commit, dispatch }, user) {
+    // fetch current user logged-in
     return new Promise((resolve, reject) => {
       commit("SET_LOGGED_IN", user !== null);
       if (user) {
@@ -24,6 +43,7 @@ const actions = {
     });
   },
   login(context, payload) {
+    // authenticate user login credentials
     return db
       .auth()
       .signInWithEmailAndPassword(payload.email_address, payload.password)
@@ -86,8 +106,11 @@ const actions = {
       .then(function(querySnapshot) {
         var value_all = [];
         querySnapshot.forEach(function(doc) {
+          
           if (doc.id) {
-            value_all.push(doc.data());
+            const data = doc.data();
+            data.id = doc.id;
+            value_all.push(data);
           }
         });
         return value_all;

@@ -46,10 +46,16 @@
         </a>
       </div>
       <div>
-        <a
-          href="#"
-          class="inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0"
-          >Download</a
+        <md-dialog-confirm
+          :md-active.sync="signOutConfirm"
+          md-content="Are you sure you want to sign-out?"
+          md-confirm-text="Yes"
+          md-cancel-text="No"
+          @md-confirm="signOut"
+          @md-cancel="signOutCancel"
+        />
+        <md-button class="md-accent md-raised" @click="signOutConfirm = true"
+          >Sign-out</md-button
         >
       </div>
     </div>
@@ -58,17 +64,27 @@
 
 <script>
 import { mapGetters } from "vuex";
+import router from "../router";
 
 export default {
   name: "navbar",
   data: function() {
     return {
       toggleVal: false,
+      signOutConfirm: false,
     };
   },
   methods: {
     toggleNavButton() {
       this.toggleVal = !this.toggleVal;
+    },
+    signOut() {
+      this.$store.dispatch("Logout").then(() => {
+        router.push("Home");
+      });
+    },
+    signOutCancel() {
+      this.signOutConfirm = false;
     },
   },
   computed: {
@@ -76,7 +92,7 @@ export default {
     ...mapGetters({
       user: "user",
     }),
-  }
+  },
 };
 </script>
 
@@ -92,7 +108,7 @@ export default {
 }
 
 .blockVal {
-  @media (max-width: 992px) {
+  @media (max-width: 768px) {
     display: none !important;
   }
 }

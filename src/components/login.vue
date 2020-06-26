@@ -198,4 +198,9 @@ export default {
   margin-top: 15px !important;
   color: red !important;
 }
+
+// https://codesource.io/build-a-chat-app-with-vuejs-and-firebase-realtime-database/
+// https://www.djamware.com/post/5d63586ee8e5fff670f31169/vuejs-tutorial-building-firebase-realtime-chat-web-app
+// https://www.npmjs.com/package/vue-chat-scroll
 </style>
+
