@@ -5,10 +5,12 @@
       <div class="chat_messages overflow-scroll" v-chat-scroll>
         <div
           class="font-sans flex text-left bg-blue-darker w-full"
-          v-for="(chat, index) in groupchat"
+          v-for="(chat, index) in filterMessages"
           :key="index"
         >
-          <div class="bg-white roundeds w-full leading-normal">
+          <div
+            class="bg-white roundeds w-full leading-normal"
+          >
             <div class="block group hover:bg-blue p-4 border-b">
               <div class="flex">
                 <div class="w-10 h-10 relative mb-4">
@@ -16,13 +18,13 @@
                     class="group w-full h-full rounded-full shadow-inner text-center bg-purple table cursor-pointer"
                   >
                     <img
-                      v-if="chat.gender == 'Male'"
+                      v-if="chat.user.gender == 'Male'"
                       src="https://pickaface.net/gallery/avatar/unr_random_180410_1905_z1exb.png"
                       alt="men avatar"
                       class="object-cover object-center w-full h-full visible group-hover:hidden"
                     />
                     <img
-                      v-if="chat.gender == 'Female'"
+                      v-if="chat.user.gender == 'Female'"
                       src="https://pickaface.net/gallery/avatar/unr_hiiiiiiiiii_200626_2306_9a1ms7.png"
                       alt="women avatar"
                       class="object-cover object-center w-full h-full visible group-hover:hidden"
@@ -32,19 +34,17 @@
                 <p
                   class="pl-4 pt-2 font-bold text-lg mb-1 text-black group-hover:text-white"
                 >
-                  {{ chat.first_name }} {{ chat.last_name }}
+                  {{ chat.user.first_name }} {{ chat.user.last_name }}
                 </p>
               </div>
 
-              <p class="chattext text-grey-darker mb-2 group-hover:text-white">
+              <p
+                class="chattext text-grey-darker mb-2 group-hover:text-white  break-all"
+              >
                 {{ chat.message }}
               </p>
             </div>
 
-            <!-- <a href="#" class="block group hover:bg-blue p-4">
-                            <p class="font-bold text-lg mb-1 text-black group-hover:text-white">Fork</p>
-                            <p class="text-grey-darker mb-2 group-hover:text-white">Start a project base on the source of an existing one.</p>
-                        </a> -->
           </div>
         </div>
       </div>
@@ -56,12 +56,13 @@
         class="md-layout m-0"
         @submit.prevent="submitMessage"
       >
-        <input type="text"
+        <input
+          type="text"
           class="resize-none w-full h-100 p-2 bg-gray-200 rounded-md textboxy"
           placeholder="Send a message . . ."
           v-model="message"
           autocomplete="message"
-        >
+        />
         <button
           type="submit"
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded submitBtn mt-2"
@@ -74,25 +75,38 @@
 </template>
 
 <script>
-// import firebase from "@/firebaseConfig";
 import { mapGetters } from "vuex";
-
-import firebase from "@/firebaseConfig";
-const db = firebase;
 
 export default {
   name: "groupchat",
   data() {
     return {
       message: null,
+      allUsers: [],
       groupchat: [],
     };
   },
   computed: {
-    // map `this.user` to `this.$store.getters.user`
     ...mapGetters({
       user: "user",
     }),
+    filterMessages() {
+      var allUsers = this.allUsers;
+      var allMessages = this.groupchat;
+
+      const myArrayFiltered = allMessages.filter((el) => {
+        Object.keys(allUsers).forEach(key => {
+          if(allUsers[key].id === el.id) {
+            el.user = allUsers[key];
+          }
+        });
+
+        return el;
+
+      });
+
+      return myArrayFiltered;
+    }
   },
   methods: {
     submitMessage() {
@@ -100,38 +114,22 @@ export default {
         this.$store
           .dispatch("newMessage", {
             message: this.message,
-            first_name: this.user.data.first_name,
-            last_name: this.user.data.last_name,
             id: this.user.data.id,
-            gender: this.user.data.gender,
           })
           .then(() => {
             this.message = null;
           });
-
-        this.scrollBottom();
       }
     },
-    scrollBottom() {
-      // var chatContainer = this.$el.querySelector(".chat_messages");
-      // chatContainer.scrollTop = chatContainer.lastElementChild.offsetTop;
-    },
   },
-  created() {
-    var self = this;
-    const convo = db.database().ref("groupchat");
-
-    convo.on("value", (snapshot) => {
-      var messages = [];
-      let data = snapshot.val();
-      Object.keys(data).forEach((key) => {
-        messages.push(data[key]);
-        messages.msg_id = key;
-      });
-
-      self.groupchat = messages;
+  mounted() {
+    // pull all conversation
+    this.$store.dispatch("allUsers").then((data) => {
+      this.allUsers = data;
     });
-    this.scrollBottom();
+    this.$store.dispatch("allConversations").then((data) => {
+      this.groupchat = data;
+    });
   },
 };
 </script>
@@ -161,5 +159,7 @@ h2 {
 
 .chat_messages {
   height: 600px;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 </style>

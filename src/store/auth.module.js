@@ -9,6 +9,25 @@ const state = {
 };
 
 const actions = {
+  getUserByID(context, payload) {
+      return db
+      .firestore()
+      .collection("users")
+      .doc(payload)
+      .get()
+      .then(function(querySnapshot) {
+        // var value_all = [];
+
+        return querySnapshot.data();
+
+        
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  
+
+  },
   Logout(context) {
     return new Promise((resolve, reject) => {
       return db
@@ -80,6 +99,15 @@ const actions = {
                   payload.email_address,
                   payload.password
                 );
+
+
+                // add the user to the list of user
+                // var doc_id = doc.id;
+                // let userListObject = { [doc_id]: false };
+                // db
+                // .firestore()
+                // .collection("user_lists")
+                // .add(userListObject)
 
                 return "success";
               })

@@ -9,7 +9,7 @@
         <GroupChat />
       </div>
       <div class="w-1/6 h-12">
-        login users
+        <SignInUsers />
       </div>
    </div>
     
@@ -20,12 +20,14 @@
 import Navbar from "@/components/navbar.vue";
 import GroupChat from "@/components/groupchat.vue";
 import HereMap from "@/components/hereMap.vue";
+import SignInUsers from "@/components/signInUsers.vue";
 
 export default {
   components: {
     Navbar,
     GroupChat,
-    HereMap
+    HereMap,
+    SignInUsers
   },
 };
 </script>
