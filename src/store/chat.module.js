@@ -6,6 +6,40 @@ const state = {
 };
 
 const actions = {
+  checkChange(context, userId) {
+
+    // Monitor connection state on browser tab
+    db.database()
+      .ref(".info/connected")
+      .on("value", function(snap) {
+        if (snap.val()) {
+          // if we lose network then remove this user from the list
+          context.dispatch("loggedMeIn", userId);
+        } else {
+          // client has lost network
+          context.dispatch("loggedMeOut", userId);
+        }
+      });
+
+
+    db.database()
+    .ref("status").on("child_added", function () {
+      context.dispatch("pullCurrentLoggedInUsers");
+      
+    });
+    
+    // update the UI to show that a user has left (gone offline)
+    db.database()
+    .ref("status").on("child_removed", function() {
+      context.dispatch("pullCurrentLoggedInUsers");
+    });
+    
+    // update the UI to show that a user's status has changed
+    db.database()
+    .ref("status").on("child_changed", function() {
+      context.dispatch("pullCurrentLoggedInUsers");
+    });
+  },
   allUsers() {
     const ref = db.firestore().collection("users");
     var user = [];
@@ -30,11 +64,28 @@ const actions = {
     });
     return messages;
   },
-  pullCurrentLoggedInUsers() {
+  pullCurrentLoggedInUsers(context) {
     db.database().ref('status').on('value', function(snapshot) {
-      if (snapshot.val() == false) {
-          return;
-      }
+      // if (. == false) {
+      //     return;
+      // }
+      var userList = [];
+      snapshot.forEach(function(childSnapshot){
+        // console.log(childSnapshot.val());
+        if(childSnapshot.val() == "online") {
+          userList.push(childSnapshot.key);
+        }
+      });
+
+      var onlineUsers = [];
+      userList.forEach(data => {
+        context.dispatch('getUserByID', data, { root: true }).then(data => {
+          // console.log(data);
+          onlineUsers.push(data);
+        });
+      });
+
+      context.commit('SET_ONLINE_USERS', onlineUsers);
     });
   },
   loggedMeIn(context, userId) {
@@ -72,9 +123,19 @@ const actions = {
   },
 };
 
-const mutations = {};
+const mutations = {
+  SET_ONLINE_USERS(state, value) {
+    state.onlineUsers = value;
+    console.log(1);
+    console.log(state.onlineUsers);
+  },
+};
 
-const getters = {};
+const getters = {
+  getOnlineUsers(state) {
+    return state.onlineUsers;
+  },
+};
 
 export default {
   state,

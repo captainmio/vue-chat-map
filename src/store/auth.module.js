@@ -9,6 +9,25 @@ const state = {
 };
 
 const actions = {
+  getUserByID(context, payload) {
+      return db
+      .firestore()
+      .collection("users")
+      .doc(payload)
+      .get()
+      .then(function(querySnapshot) {
+        // var value_all = [];
+
+        return querySnapshot.data();
+
+        
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  
+
+  },
   Logout(context) {
     return new Promise((resolve, reject) => {
       return db
