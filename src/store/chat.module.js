@@ -2,20 +2,72 @@ import firebase from "@/firebaseConfig";
 const db = firebase;
 
 const state = {
-    groupChatConversation: {}
+  onlineUsers: {}
 };
 
 const actions = {
+  allUsers() {
 
+
+    const ref = db
+        .firestore()
+        .collection("users")
+        var user = [];
+        ref.onSnapshot(snapshot => {
+          // pull all groupchat conversations
+          snapshot.docChanges().forEach((doc) => {
+  
+            let singleUser = {...doc.doc.data(), id: doc.id};
+            user.push(singleUser);
+  
+          }); 
+        });
+        return user;
+
+  },
+  allConversations() {
+    const ref = db.firestore().collection('groupchat');
+      var messages = [];
+      ref.onSnapshot(snapshot => {
+        // pull all groupchat conversations
+        snapshot.docChanges().forEach((key) => {
+
+          let buildMessage = key.doc.data();
+          messages.push(buildMessage);
+
+        }); 
+      });
+      return messages;
+
+  },
+  currentLoggedInUsers() {
+    return 1;
+    // db.auth().onAuthStateChanged(function(user) {
+    //   if (user) {
+    //     console.log(user);
+    //   } else {
+    //     console.log('no user');
+    //   }
+    // });
+
+    // db.auth().onAuthStateChanged((user) => {
+    //   if (user) {
+    //     console.log(user.uid);
+    //   } else {
+    //     console.log('a user just logeed-out');
+    //   }
+    // });
+    
+  },
   newMessage(context, payload) {
-    // create a data (Message) to groupchat collection
     return new Promise((resolve, reject) => {
-      // didn't use firestore on this part as i need a real time database result so i used firebase Realtime Database
-      db.database()
-        .ref("groupchat")
-        .push({
-              sendDate: Date(), ...payload
-            })
+      db
+        .firestore()
+        .collection("groupchat")
+        .add({
+          sendDate: Date(),
+          ...payload,
+        })
         .then((data) => {
           resolve(data);
         })
@@ -23,19 +75,16 @@ const actions = {
           reject(err.message);
         });
     });
+      
   },
 };
 
 const mutations = {
-    SET_GROUPCHAT_CONVERSATION(state, value) {
-        state.groupChatConversation = value;
-    }
+
 };
 
 const getters = {
-  groupChatConversation(state) {
-    return state.groupChatConversation;
-  }
+
 };
 
 export default {

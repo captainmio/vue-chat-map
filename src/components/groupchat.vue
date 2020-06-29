@@ -8,7 +8,7 @@
           v-for="(chat, index) in groupchat"
           :key="index"
         >
-          <div class="bg-white roundeds w-full leading-normal">
+          <div class="bg-white roundeds w-full leading-normal" v-for="(user, user_index) in allUsers" :key="user_index">
             <div class="block group hover:bg-blue p-4 border-b">
               <div class="flex">
                 <div class="w-10 h-10 relative mb-4">
@@ -16,13 +16,13 @@
                     class="group w-full h-full rounded-full shadow-inner text-center bg-purple table cursor-pointer"
                   >
                     <img
-                      v-if="chat.gender == 'Male'"
+                      v-if="user.gender == 'Male'"
                       src="https://pickaface.net/gallery/avatar/unr_random_180410_1905_z1exb.png"
                       alt="men avatar"
                       class="object-cover object-center w-full h-full visible group-hover:hidden"
                     />
                     <img
-                      v-if="chat.gender == 'Female'"
+                      v-if="user.gender == 'Female'"
                       src="https://pickaface.net/gallery/avatar/unr_hiiiiiiiiii_200626_2306_9a1ms7.png"
                       alt="women avatar"
                       class="object-cover object-center w-full h-full visible group-hover:hidden"
@@ -32,11 +32,11 @@
                 <p
                   class="pl-4 pt-2 font-bold text-lg mb-1 text-black group-hover:text-white"
                 >
-                  {{ chat.first_name }} {{ chat.last_name }}
+                  {{ user.first_name }} {{ user.last_name }}
                 </p>
               </div>
 
-              <p class="chattext text-grey-darker mb-2 group-hover:text-white">
+              <p class="chattext text-grey-darker mb-2 group-hover:text-white  break-all">
                 {{ chat.message }}
               </p>
             </div>
@@ -74,24 +74,20 @@
 </template>
 
 <script>
-// import firebase from "@/firebaseConfig";
 import { mapGetters } from "vuex";
-
-import firebase from "@/firebaseConfig";
-const db = firebase;
 
 export default {
   name: "groupchat",
   data() {
     return {
       message: null,
+      allUsers: [],
       groupchat: [],
     };
   },
   computed: {
-    // map `this.user` to `this.$store.getters.user`
     ...mapGetters({
-      user: "user",
+      user: "user"
     }),
   },
   methods: {
@@ -100,38 +96,32 @@ export default {
         this.$store
           .dispatch("newMessage", {
             message: this.message,
-            first_name: this.user.data.first_name,
-            last_name: this.user.data.last_name,
             id: this.user.data.id,
-            gender: this.user.data.gender,
           })
           .then(() => {
             this.message = null;
           });
 
-        this.scrollBottom();
+        
       }
     },
-    scrollBottom() {
-      // var chatContainer = this.$el.querySelector(".chat_messages");
-      // chatContainer.scrollTop = chatContainer.lastElementChild.offsetTop;
-    },
+     currentLoggedInUsers() {
+       this.$store
+          .dispatch("currentLoggedInUsers");
+     }
   },
-  created() {
-    var self = this;
-    const convo = db.database().ref("groupchat");
-
-    convo.on("value", (snapshot) => {
-      var messages = [];
-      let data = snapshot.val();
-      Object.keys(data).forEach((key) => {
-        messages.push(data[key]);
-        messages.msg_id = key;
-      });
-
-      self.groupchat = messages;
+  mounted() {
+    // pull all conversation
+    this.$store.dispatch("allUsers").then(data => {
+      this.allUsers = data;
     });
-    this.scrollBottom();
+    this.$store.dispatch("allConversations").then(data => {
+      this.groupchat = data;
+    });
+    
+    
+    this.currentLoggedInUsers();
+
   },
 };
 </script>
@@ -161,5 +151,7 @@ h2 {
 
 .chat_messages {
   height: 600px;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 </style>

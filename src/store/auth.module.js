@@ -74,12 +74,22 @@ const actions = {
               .firestore()
               .collection("users")
               .add(merged)
-              .then(() => {
+              .then(doc => {
                 // create user of firebase auth()
                 db.auth().createUserWithEmailAndPassword(
                   payload.email_address,
                   payload.password
                 );
+
+                var doc_id = doc.id;
+
+                let userListObject = { [doc_id]: false };
+
+                // add the user to the list of user
+                db
+                .firestore()
+                .collection("user_lists")
+                .add(userListObject)
 
                 return "success";
               })
